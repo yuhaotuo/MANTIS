@@ -85,7 +85,7 @@ def moransI(X_df, XY):
             "Morans_I":    I
             }).sort_values(by="Morans_I", ascending=False).reset_index(drop=True), W
 
-def spatvar_metabolite(mdata, MODE="fixed", ALPHA_VALUE=0.1, ALPHAS_GRID=None, cv_folds=5, n_jobs=-1, threshold = 0.2):
+def spatvar_met(mdata, MODE="fixed", ALPHA_VALUE=0.1, ALPHAS_GRID=None, cv_folds=5, n_jobs=-1, threshold = 0.2):
     spots = list(mdata.obs_names.values)
     XY = mdata.obsm['spatial'].values
     X_df = mdata.mod['metabolite'].to_df()
@@ -168,10 +168,10 @@ def spatvar_metabolite(mdata, MODE="fixed", ALPHA_VALUE=0.1, ALPHAS_GRID=None, c
     gt_names = [f"{c}_gt_{str(threshold).replace('.','p')}" for c in flag_cols]
     merged["all_three_gt_threshold"] = merged[gt_names].min(axis=1).astype(int)
 
-    mdata.uns['spatvar_metabolite_celltype_coef'] = coef_df
-    mdata.uns['spatvar_metabolite_celltype_summary'] = ct_summary
-    mdata.uns['spatvar_metabolite'] = mI_df
-    mdata.uns['spatvar_metabolite_region'] = mI_df_region
-    mdata.uns['spatvar_metabolite_celltype'] = mI_df_cell_type
-    mdata.uns['spatvar_metabolite_combined'] = merged
+    mdata.uns['spatvar_met_celltype_coef'] = coef_df
+    # mdata.uns['spatvar_met_celltype_summary'] = ct_summary
+    mdata.uns['spatvar_met'] = mI_df
+    mdata.uns['spatvar_met_region'] = mI_df_region
+    mdata.uns['spatvar_met_celltype'] = mI_df_cell_type
+    mdata.uns['spatvar_met_combined'] = merged
     return mdata

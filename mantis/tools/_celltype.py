@@ -116,7 +116,7 @@ def _compute_sci(Ydf, Cdf, xy, normalized=True, l="dmin", w_norm="row"):
 
     return pd.DataFrame(SCI_corr, index=Cdf.columns, columns=Ydf.columns)
 
-def compute_celltype_metabolite(mdata, alpha = 0.05, two_sided = True):
+def celltype_met(mdata, alpha = 0.05, two_sided = True):
     sci = _compute_sci(mdata.mod['metabolite'].to_df(), mdata.obsm['cell_type'], mdata.obsm['spatial'].values, normalized=True)
     sci_null = _compute_sci(mdata.uns['metabolite_null'].to_df(), mdata.obsm['cell_type'], mdata.obsm['spatial'].values, normalized=True)
     long_df, per_ct = _significant_by_ct_single_null(
@@ -124,6 +124,6 @@ def compute_celltype_metabolite(mdata, alpha = 0.05, two_sided = True):
         alpha=alpha,
         two_sided=two_sided
     )
-    mdata.uns['celltype_metabolite'] = long_df
-    mdata.uns['celltype_metabolite_per_ct'] = per_ct
+    mdata.uns['celltype_met'] = long_df
+    mdata.uns['celltype_met_per_ct'] = per_ct
     return mdata

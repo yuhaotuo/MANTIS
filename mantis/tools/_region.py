@@ -138,7 +138,7 @@ def _get_KL(X_df, region_df, eps = 1e-12):
     KL.index.name = "metabolite"
     return KL, C, LR
 
-def compute_regional_metabolite(mdata, alpha=0.05, two_sided = False, clip_min=1e-15):
+def regional_met(mdata, alpha=0.05, two_sided = False, clip_min=1e-15):
     X_df = mdata.uns['metabolite_raw'].to_df()
     region_df = mdata.obsm['region']
     KL, C, LR = _get_KL(X_df, region_df)
@@ -221,9 +221,9 @@ def compute_regional_metabolite(mdata, alpha=0.05, two_sided = False, clip_min=1
     df_output['KL'] = KL
     new_order = ['KL', 'p_value', 'q_value'] + [c for c in df_output.columns.tolist() if c not in ['KL', 'p_value', 'q_value']]
     df_output = df_output[new_order]
-    mdata.uns['regional_metabolite'] = df_output
+    mdata.uns['regional_met'] = df_output
     fit_table['params'] = fit_table['params'].astype(str)
-    mdata.uns['regional_metabolite_fit'] = {
+    mdata.uns['regional_met_fit'] = {
         "best_fit": best_fit,
         "best_fit_params": list(params),
         "fit_table": fit_table

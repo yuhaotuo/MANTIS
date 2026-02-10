@@ -237,7 +237,7 @@ def empirical_p_from_pooled_null_two_sided(real_vals: np.ndarray, null_vals: np.
     p = 2.0 * np.minimum(p_left, p_right)
     return np.minimum(p, 1.0)
 
-def spc_ct(mdata, mode = "fixed", alpha = 0.1, alphas_grid = np.logspace(-4, 1, 50), cv_folds = 5, n_jobs = -1, metric_col = "S", alpha_fdr = 0.05, tol = 1e-4):
+def compute_spc_ct(mdata, mode = "fixed", alpha = 0.1, alphas_grid = np.logspace(-4, 1, 50), cv_folds = 5, n_jobs = -1, metric_col = "S", alpha_fdr = 0.05, tol = 1e-4):
     # TO CHECK:
     ##  tol was made to be same everywhere
     ## Same for other parameters
@@ -593,7 +593,7 @@ def ks_D(x, y):
     D = max(D, abs(i / nx - 1.0))
     return float(D)
 
-def spc_sd(mdata, alpha_fdr = 0.05, tol = 1e-4, use_abs = False):
+def compute_spc_sd(mdata, alpha_fdr = 0.05, tol = 1e-4, use_abs = False):
     met_df = mdata.mod['metabolite'].to_df()
     rna_df = mdata.mod['gene'].to_df()
     genes = rna_df.columns.tolist()
