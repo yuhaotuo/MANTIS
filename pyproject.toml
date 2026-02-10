@@ -16,8 +16,8 @@ authors = [
   { name="Yu Hao", email="yhao306@gatech.edu" },
   { name="Bhavay Aggarwal", email="baggarwal9@gatech.edu" },
 ]
-description = "SCOUBI"
-requires-python = ">=3.12"
+description = "sc-mantis"
+requires-python = ">=3.10"
 dependencies = [
 
 ]
