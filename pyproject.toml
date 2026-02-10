@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[metadata]
+name = "MANTIS"
+version = "0.51"
+
+[tool.setuptools.packages]
+find = {}  # Scan the project directory with the default parameters
+
+[project]
+name = "sc-mantis"
+version = "0.51"
+authors = [
+  { name="Yu Hao", email="yhao306@gatech.edu" },
+  { name="Bhavay Aggarwal", email="baggarwal9@gatech.edu" },
+]
+description = "SCOUBI"
+requires-python = ">=3.12"
+dependencies = [
+
+]
+license = "MIT"
+readme = "README.md"
+
