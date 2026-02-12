@@ -140,7 +140,7 @@ def _get_KL(X_df, region_df, eps = 1e-12):
 
 def regional_met(mdata, alpha=0.05, two_sided = False, clip_min=1e-15):
     X_df = mdata.uns['metabolite_raw'].to_df()
-    region_df = mdata.obsm['region']
+    region_df = mdata.obsm['region']['region']
     KL, C, LR = _get_KL(X_df, region_df)
     X_df = mdata.uns['metabolite_null'].to_df()
     KL_null, C_null, LR_null = _get_KL(X_df, region_df)
