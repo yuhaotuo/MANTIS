@@ -18,7 +18,7 @@ pip install sc-mantis
 
 ## How to use MANTIS
 
-The detailed tutorial is available [here](https://github.com/yuhaotuo/MANTIS/main/files/tutorial.ipynb).
+The detailed tutorial is available [here](https://github.com/yuhaotuo/MANTIS/blob/main/test_package.ipynb).
 
 MANTIS expects data (both single cell transcriptomic and metabolomic) to be in csv format and can be loaded using 
 
