@@ -34,6 +34,12 @@ mdata = mt.io.load_data(coords= "spot_coordinates.csv", m_file="msi.csv", g_file
  - `region`: Region annotation file (spots x 1).
  - `cell_type`: Cell type annotation file (spots x 1).
 
+An example file has been added to the repository that can be loaded using 
+
+
+```
+mdata = mt.io.load_data(mdata="files/example.h5mu")
+```
 
 ### Sampling metabolite null
 
@@ -47,7 +53,7 @@ mdata, G = mt.tl.sample(mdata, l = l)
 ### Regional Metabolites
 
 ```
-mdata = mt.tl.compute_regional_metabolite(mdata, alpha = 0.1)
+mdata = mt.tl.regional_met(mdata, alpha = 0.1)
 ```
  - `alpha`: Significance threshold.
  
@@ -60,7 +66,7 @@ mdata = mt.tl.celltype_met(mdata)
 ### Spatially Variable Metabolites
 
 ```
-mdata = mt.tl.spatvar_metabolite(mdata)
+mdata = mt.tl.spatvar_met(mdata)
 ```
 
 ### Gene-Metabolite SCI
