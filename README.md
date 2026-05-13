@@ -78,7 +78,7 @@ mdata = mt.tl.compute_genemet_sci(mdata)
 ### SPC CT
 
 ```
-mdata = mt.tl.compute_spc_ct(mdata)
+mdata = mt.tl.compute_spc_sd(mdata)
 ```
 
 ### SPC SD
