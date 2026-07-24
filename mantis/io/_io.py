@@ -110,14 +110,15 @@ def load_data(
 
     mdata_obj = MuData(adatas)
 
-    obs_meta = pd.DataFrame(index=common_idx)
+    # obs_meta = pd.DataFrame(index=common_idx)
     if cell_type is not None:
         celltype_df = pd.read_csv(cell_type, index_col=0)
-        obs_meta["cell_type"] = celltype_df.loc[common_idx]
+        mdata_obj.obsm["cell_type"] = celltype_df.loc[common_idx]
     if region is not None:
         region_df = pd.read_csv(region, index_col=0)
-        obs_meta["region"] = region_df.loc[common_idx]
-    mdata_obj.obsm = obs_meta
+        mdata_obj.obsm["region"] = region_df.loc[common_idx]
+        # print(obs_meta)
+    # mdata_obj.obsm = obs_meta
 
     mdata_obj.obsm["spatial"] = coords_df
     mdata_obj = _attach_summarize(mdata_obj)
