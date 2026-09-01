@@ -84,18 +84,17 @@ MANTIS generates randomized metabolite maps that preserve spatial autocorrelatio
 
 Let `dmin` denote the shortest non-zero Euclidean distance between spatial cells. The default starting value for the null-map sampler is:
 
-```text
-l = 4 × dmin
-```
 
+```python
+l = 4 * dmin
 mdata, G = mt.tl.sample(mdata, l=l)
 ```
 
 The length scale `l` controls the spatial neighborhood used by the sampler:
 
-- a smaller value emphasizes short range spatial dependence;
-- a larger value incorporates more distant cells/spots and creates a broader spatial neighborhood;
-- `4 × dmin` is the default starting value.
+- A smaller value emphasizes short-range spatial dependence.
+- A larger value incorporates more distant cells or spots and creates a broader spatial neighborhood.
+- `4 * dmin` is the default starting value.
 
 Users may examine nearby values when the relevant biological patterns occur at a substantially smaller or larger spatial scale. The spatial coordinates and `l` must use the same distance units.
 
@@ -106,7 +105,6 @@ This analysis identifies metabolites associated with spatial domains.
 ```python
 mdata = mt.tl.compute_regional_metabolite(mdata, alpha=0.1)
 ```
-
 - `alpha`: significance threshold used to report discoveries.
 
 ### 4. Identify cell type-associated metabolites
