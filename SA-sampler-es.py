@@ -3,8 +3,27 @@
 
 # In[72]:
 
+import csv
+import math
+import os
+import random
+import re
+import threading
+import time
 
-import os, psutil, time, threading
+from collections import deque
+from datetime import datetime
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+import pandas as pd
+import psutil
+import seaborn as sns
+
+from IPython.display import display
+from scipy.spatial import cKDTree
 
 def monitor_memory(interval=1):
     process = psutil.Process(os.getpid())
@@ -19,12 +38,6 @@ threading.Thread(target=monitor_memory, daemon=True).start()
 # # Input
 
 # In[73]:
-
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 # In[74]:
@@ -129,13 +142,6 @@ print(region_df)
 
 # In[85]:
 
-
-import os, math, csv, random
-import numpy as np
-import networkx as nx
-from scipy.spatial import cKDTree
-import matplotlib.pyplot as plt
-import re
 
 
 # In[86]:
@@ -322,11 +328,7 @@ def local_delta_diag_perm_weighted(G, pi, X_mat, u, v, weight_key="w"):
 #     return S
 
 # def local_delta_diag_perm_weighted_cached(G, pi, X_mat, u, v, S, weight_key="w"):
-#     """
-#     用缓存 S 计算 dM，与原 local_delta_diag_perm_weighted 等价。
-#     公式（排除互为邻居的那一项）：
-#       dM = (Xv - Xu) * [ (S[u] - 1_{u~v} w_uv * Xv) - (S[v] - 1_{v~u} w_vu * Xu) ]
-#     """
+
 #     Xu = X_mat[pi[u]]
 #     Xv = X_mat[pi[v]]
 
@@ -345,34 +347,23 @@ def local_delta_diag_perm_weighted(G, pi, X_mat, u, v, weight_key="w"):
 
 
 # def apply_swap_and_update_cache(G, pi, X_mat, u, v, S, weight_key="w", swap_pi=True):
-#     """
-#     当 (u,v) 交换被接受时，更新 S，并可选择是否在这里交换 pi。
-#     记 Δ = X_u - X_v，其中 X_u = X_mat[pi[u]]，X_v = X_mat[pi[v]]（交换前的取值）
-#     更新规则（仅受影响的节点）：
-#       ∀k∈N(u)\{v}: S[k] -= w_{k,u} * Δ
-#       ∀k∈N(v)\{u}: S[k] += w_{k,v} * Δ
-#       若 u~v: S[u] += w_{u,v} * Δ,  S[v] -= w_{v,u} * Δ
-#     最后若 swap_pi=True，则在此函数内部执行 pi[u], pi[v] 交换。
-#     """
+
 #     X_u = X_mat[pi[u]].copy()
 #     X_v = X_mat[pi[v]].copy()
 #     Delta = X_u - X_v  # Δ
-
-#     # 更新与 u 相邻的所有节点（这些 S[k] 包含 w_{k,u} * X_{pi[u]}）
 #     for k in G.neighbors(u):
 #         if k == v:
 #             continue
 #         w_ku = G[k][u].get(weight_key, 1.0)
 #         S[k] -= w_ku * Delta
 
-#     # 更新与 v 相邻的所有节点（这些 S[k] 包含 w_{k,v} * X_{pi[v]}）
+
 #     for k in G.neighbors(v):
 #         if k == u:
 #             continue
 #         w_kv = G[k][v].get(weight_key, 1.0)
 #         S[k] += w_kv * Delta
 
-#     # 自身行修正（各自邻域里“对方”的那一项变化）
 #     if G.has_edge(u, v):
 #         w_uv = G[u][v].get(weight_key, 1.0)
 #         w_vu = G[v][u].get(weight_key, 1.0)
@@ -383,11 +374,8 @@ def local_delta_diag_perm_weighted(G, pi, X_mat, u, v, weight_key="w"):
 #         pi[u], pi[v] = pi[v], pi[u]
 
 
-# # ========= 你的原加权 dM（保留，作为后备或对照测试用） =========
 # def local_delta_diag_perm_weighted(G, pi, X_mat, u, v, weight_key="w"):
-#     """
-#     原始 O(deg(u)+deg(v)) 版本（未改动）。可用于回退或对照。
-#     """
+
 #     Xu = X_mat[pi[u]]
 #     Xv = X_mat[pi[v]]
 #     dM = np.zeros_like(Xu, dtype=float)
@@ -409,11 +397,7 @@ def local_delta_diag_perm_weighted(G, pi, X_mat, u, v, weight_key="w"):
 #     return dM
 
 def precalc_neighbor_sums(G, pi, X, weight_key="w"):
-    """
-    计算 S[i] = ∑_{k∈N(i)} w_{ik} * X[pi[k]]
-    X: (N, p)  已中心化的矩阵
-    返回形状: (N, p)
-    """
+
     N, p = X.shape
     S = np.zeros((N, p), dtype=float)
     for i in range(N):
@@ -423,7 +407,6 @@ def precalc_neighbor_sums(G, pi, X, weight_key="w"):
     return S
 
 
-# ========= 基于 S 的 dM（加权） =========
 def local_delta_diag_perm_weighted_cached(G, pi, X, u, v, S, weight_key="w"):
     Xu = X[pi[u]]
     Xv = X[pi[v]]
@@ -810,7 +793,7 @@ def _energy(M, M0, metric='l1'):
 
 def mcmc_shuffle_diag_delta_seqshots(
     G, coords, X_mat,
-    n_accept=5000,                   # ← 可设为 None，表示不以“目标接受数”为终止条件
+    n_accept=5000, 
     t=None,
     t_scale=1.0,
     eps=None,
@@ -843,10 +826,9 @@ def mcmc_shuffle_diag_delta_seqshots(
     t_scale_count_by="accepted",
     t_step_units="scale",
 
-    # ---- Early stopping (new) ----
     stop_on_energy=True,
-    energy_abs_tol=None,     # 若 None，自动根据数据量级设定
-    energy_rel_tol=1e-5,     # 相对阈值（相对 E_init）
+    energy_abs_tol=None, 
+    energy_rel_tol=1e-5,  
     k_consec=200,   
     stop_on_plateau=True,
     patience_accept=1000,
@@ -855,7 +837,6 @@ def mcmc_shuffle_diag_delta_seqshots(
 ):
     import os, csv, math, random
 
-    # ---- 若 X_mat 是 pandas，则转 numpy ----
     try:
         import pandas as pd
         if isinstance(X_mat, (pd.DataFrame, pd.Series)):
@@ -885,7 +866,7 @@ def mcmc_shuffle_diag_delta_seqshots(
     if use_weighted:
         S = precalc_neighbor_sums(G, pi, Xc, weight_key=weight_key)
 
-    # local_delta（优先缓存）
+    # local_delta
     def local_delta(u, v):
         if use_weighted:
             if S is not None:
@@ -895,7 +876,6 @@ def mcmc_shuffle_diag_delta_seqshots(
         else:
             return local_delta_diag_perm(G, pi, Xc, u, v)
 
-    # 快照索引
     if snapshot_metabolites is None:
         idx = np.argsort(-np.abs(Mt))
         snap_idx = list(idx[:min(topk_for_snapshot, M)])
@@ -938,7 +918,6 @@ def mcmc_shuffle_diag_delta_seqshots(
     if save_M_history:
         Ms_log.append(Mcur.copy())
 
-    # 退火计数器
     if callback_every is None:
         callback_every = acc_every
     if callback_kwargs is None:
@@ -1469,7 +1448,6 @@ def mcmc_shuffle_diag_delta_seqshots(
                 except Exception as e:
                     print(f"[callback warning] mh acc={global_acc}: {e}")
 
-            # —— 记录改进
             if Ecur <= best_E - energy_min_drop:
                 best_E = float(Ecur)
                 best_at_accept = accept_since_start
@@ -1720,12 +1698,6 @@ print(X1)
 
 # In[ ]:
 
-
-from pathlib import Path
-import numpy as np
-import pandas as pd
-import re
-
 def slugify(s: str) -> str:
     return re.sub(r'[\\/:*?"<>|\s]+', "_", str(s))
 
@@ -1814,7 +1786,6 @@ def run_independent_per_metabolite(
 
 # msi_norm_hvg_162 = msi_norm_hvg.iloc[:, :5].copy()
 
-import math
 dmin = math.sqrt(2.0)
 l = 4 * dmin
 G = build_weighted_radius_graph(coords_df[["x","y"]].values, l=l, radius=float('inf'), weight_key="w")
@@ -1899,12 +1870,6 @@ results = run_independent_per_metabolite(
 
 # In[ ]:
 
-
-import os
-from pathlib import Path
-import numpy as np
-import matplotlib.pyplot as plt
-import re
 
 def slugify(s: str) -> str:
     return re.sub(r'[\\/:*?"<>|\s]+', "_", str(s))
@@ -2054,9 +2019,6 @@ coords, X1, spot_ids, met_names = align_inputs(coords_df, msi_norm_hvg_162)
 # In[ ]:
 
 
-import numpy as np, pandas as pd, re
-from pathlib import Path
-
 def slugify(s: str) -> str:
     return re.sub(r'[\\/:*?"<>|\s]+', "_", str(s))
 
@@ -2133,7 +2095,6 @@ print(rna_norm_hvg)
 # In[119]:
 
 
-from scipy.spatial.distance import pdist, squareform
 coords_mat = coords_df[["x", "y"]].values
 D_condensed = pdist(coords_mat, metric="euclidean")
 dist = squareform(D_condensed)  
@@ -2191,7 +2152,6 @@ print(SCI_df_2.iloc[:5, :5])
 # In[121]:
 
 
-from scipy.spatial.distance import pdist, squareform
 coords_mat = coords_df[["x", "y"]].values
 D_condensed = pdist(coords_mat, metric="euclidean")
 dist = squareform(D_condensed)  
@@ -2248,12 +2208,6 @@ print(SCI_df_0.iloc[:5, :5])
 # In[ ]:
 
 
-import re
-from pathlib import Path
-from typing import Optional, Dict
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 
 def slugify(s: str) -> str:
 
@@ -2326,14 +2280,6 @@ save_histograms_per_metabolite(
 
 # In[ ]:
 
-
-import re
-from pathlib import Path
-from typing import Optional, Dict
-import numpy as np
-import pandas as pd
-from scipy.stats import norm
-import matplotlib.pyplot as plt
 
 def slugify(s: str) -> str:
     return re.sub(r'[\\/:*?"<>|\s]+', "_", str(s))
