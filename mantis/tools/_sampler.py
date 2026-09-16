@@ -538,6 +538,7 @@ def sample(
         obs=pd.DataFrame(index=sampled_df.index),
         var=pd.DataFrame(index=sampled_df.columns)
     )
+    mdata.uns['mcmc_order'] = order_df
     X_rearranged = mdata.uns["metabolite_raw"].to_df().values[mdata.uns['mcmc_order'].values, np.arange(mdata.uns['mcmc_order'].values.shape[1])]
     mdata.uns["metabolite_null"] = ad.AnnData(
             X=X_rearranged,
@@ -545,5 +546,4 @@ def sample(
             var=pd.DataFrame(index=mdata.mod["metabolite"].var_names)
         )
     mdata.uns['mcmc_snapshots'] = snapshots_df
-    mdata.uns['mcmc_order'] = order_df
     return mdata, G
